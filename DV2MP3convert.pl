@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 #~/bin/HandBrakeCLI -i "iMovie Events/twain! (edited)/clip-2008-09-15 01;41;52.dv" -o test.mkv --preset "DV to MP4"
 #!/bin/perl -w;
 use strict;
@@ -9,7 +11,8 @@ use File::stat;
 use Data::Dumper;
 use Number::Bytes::Human qw(format_bytes);
 
-my $indir = "/Volumes/PatrickWD/iMovie Events";
+#my $indir = "/Volumes/PatrickWD/iMovie Events";
+my $indir = shift;
 
 my @arr;
 my $total_bytes = 0;
@@ -36,13 +39,23 @@ while (my $entry = shift @arr ) {
 sub wanted {
 
     # only converting dv's
-    next unless /\.dv$/i;
+    return unless /\.dv$/i;
 
-	my $size = -s $File::Find::name;
+	#my $file = escapeshellarg($File::Find::name);
+
+	my $dir =$File::Find::dir;
+	if (!chdir($File::Find::dir)) {
+		print "Couldn't change directory to $dir: $!\n";
+		return;
+	}
+	
+	my $size = -s $_;
+	print "Size $_ - $size $!\n";
+	print "Size $File::Find::dir - $size $!\n";
 	$total_bytes += $size;
 	if ($size == 0) {
-		print "Skipping $_. 0 bytes.";
-		next;
+		print "Skipping $_. 0 bytes.\n";
+		return;
 	}
 	
     push(
@@ -57,6 +70,14 @@ sub wanted {
 
 }
 
+sub escapeshellarg { 
+    my ($str) = @_; # ? shift : $_;
+    #$str =~ s/((?:^|[^\\])(?:\\\\)*)'/$1\\'/g;
+    $str =~ s/\ /\\ /g;
+    return "$str";
+}
+
+
 #######################
 sub process_entry {
     my ($entry) = @_;
@@ -69,16 +90,17 @@ sub process_entry {
 
     #    my $out_file = $_;
     my $out_file = $$entry{'name'};
-    $out_file =~ s/\.dv$/\.mp4/i;
+    $out_file =~ s/\.dv$/\.mov/i;
 
     #    my $idir = $File::Find::dir;
     #    my $odir = $File::Find::dir;
 
     my $idir = $$entry{'dir'};
     my $odir = $$entry{'dir'};
-    $odir .= " (mp4)";
+    $odir .= " (mov)";
     my $out = "$odir/$out_file";
-    my $tmp = "/tmp/$out_file";
+    my $tmp = "/tmp/$out_file.$$";
+
 
     my $short_in = $in;
     $short_in =~ s/$indir//g;
@@ -100,8 +122,8 @@ sub process_entry {
         `$cmd >> /tmp/convert_log.txt 2>&1`;
         die "failed command $cmd\n" unless $? == 0;
 
-		print "Copying $tmp\n";
-        move( $tmp, $out ) || die("failed mv of $tmp");
+		print "Copying $tmp to $out\n";
+        move( $tmp, $out ) || die("failed mv of $tmp to $out");
 
         # Set file mtime and atime
 		print "Updating timestamp\n";
