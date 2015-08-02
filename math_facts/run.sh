@@ -1,0 +1,9 @@
+perl -w math_facts.pl math_facts_format.xls math_facts_01.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_02.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_03.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_04.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_05.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_06.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_07.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_08.xls
+perl -w math_facts.pl math_facts_format.xls math_facts_09.xls

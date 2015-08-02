@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 # sudo cpan
 # password:
 # cpan> install Mac::PropertyList::SAX

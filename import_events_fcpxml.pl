@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 use strict;
 use Getopt::Long;
 use FileHandle;
@@ -48,6 +50,8 @@ foreach my $file (@files) {
 	$full_file =~ s/\&/%26/g;
 	$full_file =~ s/\(/%28/g;
 	$full_file =~ s/\)/%29/g;
+	$full_file =~ s/\;/%3B/g;
+
     $assets_xml .= " " x 12
       . "<asset id=\"r$iter\" projectRef=\"e1\" src=\"file:$full_file\"/>\n";
     $iter++;
@@ -59,7 +63,6 @@ $event =~ s/\"/\&quot\;/g;
 $event =~ s/\</\&lt\;/g;
 $event =~ s/\>/\&gt\;/g;
 $event =~ s/\'/\&apos\;/g;	
-
 #$library = uri_encode($library);
 
 my $file = <<TOHERE;
