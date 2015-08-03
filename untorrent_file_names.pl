@@ -1,9 +1,12 @@
+#!/opt/local/bin/perl
 use strict;
 
 use File::Find;
 use File::Copy;
+use Term::ReadLine::Perl5;
 
 my $dir = shift;
+my $term = Term::ReadLine::Perl5->new('untorrent');
 
 find(\&wanted,$dir);
 
@@ -27,7 +30,7 @@ sub wanted {
 
 
 		# delete images and nfo
-		if ( $orig =~ /\.(nfo|jpg|png|gif)$/ ) {
+		if ( $orig =~ /\.(nfo|jpg|png|gif)$/i ) {
 			print "$orig\n";
 			if (ask("Delete img?")) {
 				unlink($orig);	
@@ -36,13 +39,13 @@ sub wanted {
 		}
 
 		# delete subtitle files?
-		if ( $orig =~ /\.(srt)$/ ) {
-			print "$orig\n";
-			if (ask("Delete srt?")) {
-				unlink($orig);	
-				return;			
-			}
-		}
+        # if ( $orig =~ /\.(srt)$/i ) {
+        #     print "$orig\n";
+        #     if (ask("Delete srt?")) {
+        #         unlink($orig);
+        #         return;
+        #     }
+        # }
 
 		# delete txt files?
 		if ( $orig =~ /\.(txt)$/i ) {
@@ -57,7 +60,7 @@ sub wanted {
 		$base =~ s/[\s-]*\b(YIFY|WEBDL|bajskorv|w4f|400P|MP4|Secludedly|2HD|x264|R5|PublicHD|anoXmous_eng|SDH|SAMPLE|anoXmous_|Rifftrax|ETRG|2ch|AAC|KILLERS|EVO|BOKUTOX|RARBG|FXM|WBZ|DD5|H264|FLAWL3SS|NYDIC|ACAB|MAXSPEED|6CH|ShAaNiG\scom|www.torentz.3xforum.ro|DVD-Rip|WEB-DL|KLAXXON|READNFO|AC3|HELLRAZ0R|MP3|DTS|WIKI|nogrp|axxo|hdrip|AC3-JYK|FXG|DTS-JYK|hc|xvid|brrip|webrip|DIMENSION|LOL|DVDRip|HDTV|Sir.Paul|EbiXVid|FUM|Bluray)\b//gi;
 
 		# Case sensitive (don't want to catch common words)
-		$base =~ s/[\s-]*\b(Eng|VectoR|FoV|FuckGov|mSD|IMMERSE|RM-ASAP|ASAP|MIKY|RiVER|EVOLVE|fqm|ViSiON|PROPER|LiNE|WS|IMAGiNE|sm|DEViSE|LiMiTED|DiVERSE|PrisM)\b//g;
+		$base =~ s/[\s-]*\b(Eng|VectoR|FoV|FuckGov|mSD|ENG-ITA-Comm|IMMERSE|RM-ASAP|ASAP|MIKY|RiVER|EVOLVE|fqm|ViSiON|PROPER|LiNE|WS|IMAGiNE|sm|DEViSE|LiMiTED|DiVERSE|PrisM)\b//g;
 
 		$base =~ s/HDTV/1080p/g;
 		$base =~ s/[-\s\(\[]*(1080p|720p|480p)[\]\)]*/ [$1]/g;
@@ -88,16 +91,24 @@ sub wanted {
 			}
 			
 			print "mv $orig\n   $new\n";
-			if ( ask("Rename?") ) {
-				#rename($orig,$new);
-				move($orig,$new) || die "Move failed: $!";
-				print " ... renamed\n";
-			} else {
-				print " ... skipped\n";
-			}
+            if ( ask("Rename?") ) {
+                $new = $term->readline('rename>',$new);
+                if ($new ne $orig) {
+                    move($orig,$new) || die "Move failed: $!";
+                    print " ... renamed\n";
+                }
+            }
+            
+            # if ( ask("Rename?") ) {
+            #     #rename($orig,$new);
+            #     move($orig,$new) || die "Move failed: $!";
+            #     print " ... renamed\n";
+            # } else {
+            #     print " ... skipped\n";
+            # }
 
 			# Ask to move the file up a level?
-			print "mv $new ..?\n";			
+			print "\nmv $new ..?\n";			
 			if ( ask("Move up ..?") ) {
 				move($new, "..") || die "Move failed: $!";
 				
@@ -111,14 +122,15 @@ sub wanted {
     } else {
     	print "Skipping $_\n";
     }
-	print "\n";
+	print "\n\n";
 }
 
 # prompt should contain a question like rename? delete?
 sub ask {
 	my($prompt)  = @_;
-	print "$prompt (y|n) > ";
-	my $answer = <STDIN>;
+    # print "$prompt (y|n) > ";
+    # my $answer = <STDIN>;
+    my $answer = $term->readline("$prompt (y|n) > ", "y");
 	chomp $answer;
 	if ($answer eq "" || $answer =~ /^[y\']$/i ) {
 		return 1;

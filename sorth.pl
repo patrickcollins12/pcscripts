@@ -1,4 +1,4 @@
-#!/bin/perl -w
+#!/opt/local/bin/perl -w
 # Usage: perl sorth.pl <col-to-sort> 
 #    sorts on column 5 (default 0)
 #    default separator is any whitespace
